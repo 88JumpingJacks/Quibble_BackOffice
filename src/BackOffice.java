@@ -1,7 +1,6 @@
 import java.io.*;
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by jackli on 2015-11-11.
@@ -9,6 +8,7 @@ import java.util.Map;
  * Class represents Quibble Back Office operations such as merging events
  * transaction files, creating new master events file, creating new current
  * events files, etc.
+ * test
  */
 public class BackOffice
 {
@@ -30,6 +30,9 @@ public class BackOffice
             BufferedReader lBufferedReader = new BufferedReader(lFileReader);
 
             // Store info read from master events file
+            // Key is event name, value is MasterEventTransactionsInfo object
+            // that contains event info such as date, number of tickets and 
+            // event name
             Map<String, MasterEventTransactionsInfo> lMasterMap = new
                     HashMap<>();
 
@@ -43,7 +46,6 @@ public class BackOffice
             {
                 String[] lLineArray = new String[3];
 
-                // todo check that can get substring from lLine
                 lLineArray[0] = lLine.substring(0, 6);
                 lLineArray[1] = lLine.substring(7, 12);
                 lLineArray[2] = lLine.substring(13);
@@ -53,11 +55,19 @@ public class BackOffice
                 String lMasterEventName = lLineArray[2];
 
                 lMasterLineInfo = new MasterEventTransactionsInfo(lDate,
-                        lNumTickets,
-                        lMasterEventName);
+                        lNumTickets, lMasterEventName);
 
                 lMasterMap.put(lMasterEventName, lMasterLineInfo);
             }
+
+            // todo remove
+            System.out.println("***lMasterMap: ");
+            for (String lEventName : lMasterMap.keySet())
+            {
+                System.out.println("lEventName: " + lEventName + " Date: " +
+                        lMasterMap.get(lEventName).date);
+            }
+
 
             lFileReader = new FileReader
                     (aInMergedEventTransactionFiles);
@@ -66,6 +76,9 @@ public class BackOffice
             // Read aInMergedEventTransactionFiles line-by-line
             while ((lLine = lBufferedReader.readLine()) != null)
             {
+                // todo remove
+                System.out.println("YOa");
+
                 // Parse the line to get the transaction code (read first two
                 // characters)
                 String lTransactionCode = lLine.substring(0, 2);
@@ -73,6 +86,10 @@ public class BackOffice
 
                 // Date (This is only used if the transaction is "create")
                 String lDate = lLine.substring(24, 30);
+
+                // todo remove
+                System.out.println("lLine: " + lLine);
+                System.out.println("Date: " + lDate);
 
                 int lYear = Integer.parseInt(lDate.substring
                         (0, 2));
@@ -95,6 +112,12 @@ public class BackOffice
                     // new master events file and do not process the transaction
                     if (lEventDate.isBefore(lToday))
                     {
+                        // todo remove
+                        System.out.println("YOb");
+                        // todo remove
+                        System.out.println(lLine + aInMasterEventFile.getPath
+                                ());
+
                         System.out.println(Constants.BACK_OFFICE + Constants
                                 .ERROR_EVENT_DATE_PAST);
                         continue;
@@ -140,6 +163,13 @@ public class BackOffice
 
                     // return
                     case "02":
+                        // todo remove
+                        System.out.println("YOc");
+
+                        // todo remove
+                        System.out.println("lTransactionEventName: " +
+                                lTransactionEventName);
+
                         lNewNumTickets = Integer.parseInt(lMasterMap.get
                                 (lTransactionEventName).numberTickets) + Integer
                                 .parseInt(lNumTicketsTransaction);
@@ -156,6 +186,10 @@ public class BackOffice
                     case "03":
                         // Check that there is no event already existing for 
                         // the transaction
+                        // todo remove
+                        System.out.println("case 03 lTransactionEventName: "
+                                + lTransactionEventName);
+
                         if (lMasterMap.containsKey(lTransactionEventName))
                         {
                             System.out.println(Constants.BACK_OFFICE +
@@ -210,29 +244,170 @@ public class BackOffice
             lFW_CurrentEvents.write("");
             lFW_CurrentEvents.close();
 
-            // Instantiate new FileWriter that appends instead of of overwrite
-            // for both master events file and current events file
+            // Instantiate new FileWriter that overwrites instead of appends
+            // for both master events file and current events file because we 
+            // start with fresh files for these each day
             FileWriter lFW_MasterEvent = new FileWriter(aInMasterEventFile,
-                    true);
+                    false);
             FileWriter lFW_Current_Events = new FileWriter
                     (aInCurrentEventsFile, true);
 
-            // Write lMasterMap line by line to master events file and content
-            int lCount = 0;
-            int lEnd = lMasterMap.size();
-            for (String lKey : lMasterMap.keySet())
+            // List to store MasterEventTransactionsInfo objects, ordered by
+            // event date
+            List<MasterEventTransactionsInfo> lEventsByDateList =
+                    new ArrayList<>();
+
+            // Parse date and store date components in these variables from
+            // lMasterMap event
+            int lMasterEventYear;
+            int lMasterEventMonth;
+            int lMasterEventDay;
+
+            // Parse date and store date components in these variables from
+            // lEventsByDateList event
+            int lListEventYear;
+            int lListEventMonth;
+            int lListEventDay;
+
+            // todo remove
+            System.out.println("***lMasterMap");
+            for (String lEventName : lMasterMap.keySet())
             {
-                lCount++;
-                lFW_MasterEvent.write(lMasterMap.get(lKey).date + " ");
-                lFW_MasterEvent.write(lMasterMap.get(lKey).numberTickets + " ");
+                System.out.println("lEventName: " + lEventName + " Date: " +
+                        lMasterMap.get(lEventName).date);
+            }
+
+            // Order Events by date in a List
+            for (MasterEventTransactionsInfo lMasterMapEventObject :
+                    lMasterMap.values())
+            {
+                // todo remove
+                System.out.println("NO YO!!");
+                System.out.println("lMasterMapEventObject: " +
+                        lMasterMapEventObject.eventName);
+
+                lEventsByDateList.add(lMasterMapEventObject);
+                
+//                if (lEventsByDateList.isEmpty())
+//                {
+//                    // Insert first MasterEventTransactionsInfo object
+//                    lEventsByDateList.add(lMasterMapEventObject);
+//                }
+//                else
+//                {
+
+
+                // Iterate entire lEventsByDateList and compare dates to 
+                    // check where it should be inserted
+//                    for (int lCount = 0; lCount < lMasterMap.size();
+//                         lCount++)
+//                    {
+//                        // todo remove
+//                        System.out.println("lCount: " + lCount);
+//                        System.out.println("lEventsByDateList size: " + lEventsByDateList.size());
+
+//                        // If the event we are comparing is the same as the 
+//                        // first one we inserted, skip it
+//                        if (lCount < lEventsByDateList.size() && 
+//                                (lMasterMapEventObject.eventName).equals
+//                                (lEventsByDateList.get(lCount)
+//                                        .eventName))
+//                        {
+//                            continue;
+//                        }
+                        
+                        
+
+//                        if (lMasterEventYear < lListEventYear)
+//                        {
+//                            // todo remove
+//                            System.out.println("Inserting if");
+//
+//                            lEventsByDateList.add(lCount,
+//                                    lMasterMapEventObject);
+//                            continue;
+//                        }
+//                        else if (lMasterEventMonth < lListEventMonth)
+//                        {
+//                            // todo remove
+//                            System.out.println("Inserting else ifA");
+//
+//                            lEventsByDateList.add(lCount,
+//                                    lMasterMapEventObject);
+//                            continue;
+//                        }
+//                        else if (lMasterEventDay < lListEventDay)
+//                        {
+//                            // todo remove
+//                            System.out.println("Inserting else ifB");
+//
+//                            lEventsByDateList.add(lCount,
+//                                    lMasterMapEventObject);
+//                            continue;
+//                        }
+//                        else
+//                        {
+//                            // todo remove
+//                            System.out.println("Inserting elseA");
+//
+//                            // todo remove
+//                            System.out.println("lMasterMapEventObject event " +
+//                                    "name: " + lMasterMapEventObject.eventName);
+//                            System.out.println("lMasterMap.size(): " +
+//                                    lMasterMap.size());
+//
+//                            lEventsByDateList.add(lMasterMapEventObject);
+//                        }
+//                    }
+//                }
+
+                // Reset date variables
+                lMasterEventYear = 0;
+                lMasterEventMonth = 0;
+                lMasterEventDay = 0;
+
+                lListEventYear = 0;
+                lListEventMonth = 0;
+                lListEventDay = 0;
+            }
+
+            // todo
+            // Sort the lEventsByDateList by date
+            Collections.sort(lEventsByDateList);
+
+            // todo remove
+            System.out.println("***lMasterMap: ");
+            for (String lEventName : lMasterMap.keySet())
+            {
+                System.out.println("lEventName: " + lEventName + " Date: " +
+                        lMasterMap.get(lEventName).date);
+            }
+
+            // todo remove
+            System.out.println("***lEventsByDateList: ");
+            for (MasterEventTransactionsInfo lEvent : lEventsByDateList)
+            {
+                System.out.println("lEvent: " + lEvent.eventName + " Date: "
+                        + lEvent.date);
+            }
+            
+            // Write lEventsByDateList line by line to master events file and
+            // content
+            for (int lCount = 0; lCount < lEventsByDateList.size(); lCount++)
+            {
+                lFW_MasterEvent.write(lEventsByDateList.get(lCount).date + " ");
+                lFW_MasterEvent.write(lEventsByDateList.get(lCount)
+                        .numberTickets + " ");
 
                 // lKey is the event name
-                lFW_MasterEvent.write(lKey);
+                lFW_MasterEvent.write(lEventsByDateList.get(lCount).eventName);
 
-                lFW_Current_Events.write(lKey + " ");
-                lFW_Current_Events.write(lMasterMap.get(lKey).numberTickets);
+                lFW_Current_Events.write(lEventsByDateList.get(lCount)
+                        .eventName + " ");
+                lFW_Current_Events.write(lEventsByDateList.get(lCount)
+                        .numberTickets);
 
-                if (lCount < lEnd)
+                if (lCount < lEventsByDateList.size())
                 {
                     lFW_MasterEvent.write("\n");
                     lFW_Current_Events.write("\n");
@@ -283,15 +458,15 @@ public class BackOffice
 
     public static void main(String[] args)
     {
-        String lFilesDir = "../../Quibble_Files/";
+        String lFilesDir = "../../Quibble_Files_Assignment6/";
 
         File lMasterEventsFile = new File
                 (lFilesDir + "Master_Events_File");
         File lCurrentEventsFile = new File(lFilesDir + "Current_Events_File");
         File lMergedTransactionFile = new File(lFilesDir +
                 "Merged_Event_Transaction_Files");
-        
-        processTransactions(lMasterEventsFile, lCurrentEventsFile, 
+
+        processTransactions(lMasterEventsFile, lCurrentEventsFile,
                 lMergedTransactionFile);
     }
 }
