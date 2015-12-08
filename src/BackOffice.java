@@ -8,7 +8,7 @@ import java.util.*;
  * Class represents Quibble Back Office operations such as merging events
  * transaction files, creating new master events file, creating new current
  * events files, etc.
- * test
+ * t
  */
 public class BackOffice
 {
