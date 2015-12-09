@@ -8,10 +8,11 @@ import java.util.*;
  * Class represents Quibble Back Office operations such as merging events
  * transaction files, creating new master events file, creating new current
  * events files, etc.
- * t
  */
 public class BackOffice
 {
+    public static Map<String, String> masterEventMap = new HashMap<>();
+
     /**
      * Process the previous day's transactions against the master events
      * file, updates current events file and master events file with the newly
@@ -41,6 +42,8 @@ public class BackOffice
 
             MasterEventTransactionsInfo lMasterLineInfo;
 
+            String tempDate;
+
             // Read master events file line by line, store info in a HashMap
             while ((lLine = lBufferedReader.readLine()) != null)
             {
@@ -58,16 +61,12 @@ public class BackOffice
                         lNumTickets, lMasterEventName);
 
                 lMasterMap.put(lMasterEventName, lMasterLineInfo);
-            }
 
-            // todo remove
-            System.out.println("***lMasterMap: ");
-            for (String lEventName : lMasterMap.keySet())
-            {
-                System.out.println("lEventName: " + lEventName + " Date: " +
-                        lMasterMap.get(lEventName).date);
-            }
+                tempDate = lDate.substring(0, 2).concat(lDate.substring(2, 4))
+                        .concat(lDate.substring(4, 6));
 
+                masterEventMap.put(lMasterEventName, tempDate);
+            }
 
             lFileReader = new FileReader
                     (aInMergedEventTransactionFiles);
@@ -76,9 +75,6 @@ public class BackOffice
             // Read aInMergedEventTransactionFiles line-by-line
             while ((lLine = lBufferedReader.readLine()) != null)
             {
-                // todo remove
-                System.out.println("YOa");
-
                 // Parse the line to get the transaction code (read first two
                 // characters)
                 String lTransactionCode = lLine.substring(0, 2);
@@ -86,10 +82,6 @@ public class BackOffice
 
                 // Date (This is only used if the transaction is "create")
                 String lDate = lLine.substring(24, 30);
-
-                // todo remove
-                System.out.println("lLine: " + lLine);
-                System.out.println("Date: " + lDate);
 
                 int lYear = Integer.parseInt(lDate.substring
                         (0, 2));
@@ -112,12 +104,6 @@ public class BackOffice
                     // new master events file and do not process the transaction
                     if (lEventDate.isBefore(lToday))
                     {
-                        // todo remove
-                        System.out.println("YOb");
-                        // todo remove
-                        System.out.println(lLine + aInMasterEventFile.getPath
-                                ());
-
                         System.out.println(Constants.BACK_OFFICE + Constants
                                 .ERROR_EVENT_DATE_PAST);
                         continue;
@@ -154,7 +140,8 @@ public class BackOffice
                         }
 
                         lMasterLineInfo = new MasterEventTransactionsInfo
-                                (lDate, addStringZeros(lNewNumTickets),
+                                (masterEventMap.get(lTransactionEventName),
+                                        addStringZeros(lNewNumTickets),
                                         lTransactionEventName);
 
                         // Update lMasterMap with new info
@@ -163,19 +150,13 @@ public class BackOffice
 
                     // return
                     case "02":
-                        // todo remove
-                        System.out.println("YOc");
-
-                        // todo remove
-                        System.out.println("lTransactionEventName: " +
-                                lTransactionEventName);
-
                         lNewNumTickets = Integer.parseInt(lMasterMap.get
                                 (lTransactionEventName).numberTickets) + Integer
                                 .parseInt(lNumTicketsTransaction);
 
                         lMasterLineInfo = new MasterEventTransactionsInfo
-                                (lDate, addStringZeros(lNewNumTickets),
+                                (masterEventMap.get(lTransactionEventName), 
+                                        addStringZeros(lNewNumTickets),
                                         lTransactionEventName);
 
                         // Update lMasterMap with new info
@@ -186,10 +167,6 @@ public class BackOffice
                     case "03":
                         // Check that there is no event already existing for 
                         // the transaction
-                        // todo remove
-                        System.out.println("case 03 lTransactionEventName: "
-                                + lTransactionEventName);
-
                         if (lMasterMap.containsKey(lTransactionEventName))
                         {
                             System.out.println(Constants.BACK_OFFICE +
@@ -214,7 +191,7 @@ public class BackOffice
                         lNewNumTickets = lOldTickets + lMoreTickets;
 
                         lMasterLineInfo = new MasterEventTransactionsInfo
-                                (lDate, addStringZeros(lNewNumTickets),
+                                (masterEventMap.get(lTransactionEventName), addStringZeros(lNewNumTickets),
                                         lTransactionEventName);
 
                         // Update lMasterMap with new info
@@ -256,141 +233,17 @@ public class BackOffice
             // event date
             List<MasterEventTransactionsInfo> lEventsByDateList =
                     new ArrayList<>();
-
-            // Parse date and store date components in these variables from
-            // lMasterMap event
-            int lMasterEventYear;
-            int lMasterEventMonth;
-            int lMasterEventDay;
-
-            // Parse date and store date components in these variables from
-            // lEventsByDateList event
-            int lListEventYear;
-            int lListEventMonth;
-            int lListEventDay;
-
-            // todo remove
-            System.out.println("***lMasterMap");
-            for (String lEventName : lMasterMap.keySet())
-            {
-                System.out.println("lEventName: " + lEventName + " Date: " +
-                        lMasterMap.get(lEventName).date);
-            }
-
-            // Order Events by date in a List
+            
+            // Populate lEventsByDateList
             for (MasterEventTransactionsInfo lMasterMapEventObject :
                     lMasterMap.values())
             {
-                // todo remove
-                System.out.println("NO YO!!");
-                System.out.println("lMasterMapEventObject: " +
-                        lMasterMapEventObject.eventName);
-
                 lEventsByDateList.add(lMasterMapEventObject);
-                
-//                if (lEventsByDateList.isEmpty())
-//                {
-//                    // Insert first MasterEventTransactionsInfo object
-//                    lEventsByDateList.add(lMasterMapEventObject);
-//                }
-//                else
-//                {
-
-
-                // Iterate entire lEventsByDateList and compare dates to 
-                    // check where it should be inserted
-//                    for (int lCount = 0; lCount < lMasterMap.size();
-//                         lCount++)
-//                    {
-//                        // todo remove
-//                        System.out.println("lCount: " + lCount);
-//                        System.out.println("lEventsByDateList size: " + lEventsByDateList.size());
-
-//                        // If the event we are comparing is the same as the 
-//                        // first one we inserted, skip it
-//                        if (lCount < lEventsByDateList.size() && 
-//                                (lMasterMapEventObject.eventName).equals
-//                                (lEventsByDateList.get(lCount)
-//                                        .eventName))
-//                        {
-//                            continue;
-//                        }
-                        
-                        
-
-//                        if (lMasterEventYear < lListEventYear)
-//                        {
-//                            // todo remove
-//                            System.out.println("Inserting if");
-//
-//                            lEventsByDateList.add(lCount,
-//                                    lMasterMapEventObject);
-//                            continue;
-//                        }
-//                        else if (lMasterEventMonth < lListEventMonth)
-//                        {
-//                            // todo remove
-//                            System.out.println("Inserting else ifA");
-//
-//                            lEventsByDateList.add(lCount,
-//                                    lMasterMapEventObject);
-//                            continue;
-//                        }
-//                        else if (lMasterEventDay < lListEventDay)
-//                        {
-//                            // todo remove
-//                            System.out.println("Inserting else ifB");
-//
-//                            lEventsByDateList.add(lCount,
-//                                    lMasterMapEventObject);
-//                            continue;
-//                        }
-//                        else
-//                        {
-//                            // todo remove
-//                            System.out.println("Inserting elseA");
-//
-//                            // todo remove
-//                            System.out.println("lMasterMapEventObject event " +
-//                                    "name: " + lMasterMapEventObject.eventName);
-//                            System.out.println("lMasterMap.size(): " +
-//                                    lMasterMap.size());
-//
-//                            lEventsByDateList.add(lMasterMapEventObject);
-//                        }
-//                    }
-//                }
-
-                // Reset date variables
-                lMasterEventYear = 0;
-                lMasterEventMonth = 0;
-                lMasterEventDay = 0;
-
-                lListEventYear = 0;
-                lListEventMonth = 0;
-                lListEventDay = 0;
             }
 
-            // todo
             // Sort the lEventsByDateList by date
             Collections.sort(lEventsByDateList);
 
-            // todo remove
-            System.out.println("***lMasterMap: ");
-            for (String lEventName : lMasterMap.keySet())
-            {
-                System.out.println("lEventName: " + lEventName + " Date: " +
-                        lMasterMap.get(lEventName).date);
-            }
-
-            // todo remove
-            System.out.println("***lEventsByDateList: ");
-            for (MasterEventTransactionsInfo lEvent : lEventsByDateList)
-            {
-                System.out.println("lEvent: " + lEvent.eventName + " Date: "
-                        + lEvent.date);
-            }
-            
             // Write lEventsByDateList line by line to master events file and
             // content
             for (int lCount = 0; lCount < lEventsByDateList.size(); lCount++)

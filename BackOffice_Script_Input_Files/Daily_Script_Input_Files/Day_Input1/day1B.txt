@@ -1,0 +1,7 @@
+login
+admin
+create
+b
+151210
+7
+logout

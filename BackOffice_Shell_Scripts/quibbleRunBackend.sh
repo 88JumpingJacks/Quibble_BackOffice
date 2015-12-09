@@ -19,12 +19,9 @@ MERGED_EVENT_TRANSACTION_FILES="$FILES_DIR/Merged_Event_Transaction_Files"
 # Clear the previous contents from the merged transaction file
 echo -n >| $MERGED_EVENT_TRANSACTION_FILES
 
-# Automated test of .trn files
+# Merge the daily transaction files
 for TRANSACTION_FILE in $(find "$DIR" -name "*.trn")
 do
-	#remove this
-	echo "YO $TRANSACTION_FILE"
-
 	# Merge every individual transaction file to MERGED_EVENT_TRANSACTION_FILES
 	paste $TRANSACTION_FILE >> $MERGED_EVENT_TRANSACTION_FILES
 done

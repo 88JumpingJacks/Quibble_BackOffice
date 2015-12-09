@@ -1,0 +1,6 @@
+login
+sales
+sell
+b
+10
+logout

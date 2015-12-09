@@ -1,0 +1,7 @@
+login
+admin
+create
+a
+161231
+1000
+logout

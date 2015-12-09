@@ -1,0 +1,6 @@
+login
+admin
+sell
+b
+2
+logout

@@ -1,0 +1,6 @@
+login
+admin
+return
+a
+1
+logout
